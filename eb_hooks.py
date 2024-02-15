@@ -246,6 +246,19 @@ def parse_hook_ucx_eprefix(ec, eprefix):
         raise EasyBuildError("UCX-specific hook triggered for non-UCX easyconfig?!")
 
 
+def parse_hook_lammps_remove_deps_for_CI_aarch64(ec, *args, **kwargs):
+    """
+    Remove x86_64 specific dependencies for the CI to pass on aarch64
+    """
+    if ec.name == 'LAMMPS':
+        if ec.version == '2Aug2023_update2':
+            if os.getenv('EESSI_CPU_FAMILY') == 'aarch64':
+                ec['dependencies'].remove(('ScaFaCoS', '1.0.4'))
+                ec['dependencies'].remove(('tbb', '2021.11.0'))
+    else:
+        raise EasyBuildError("LAMMPS-specific hook triggered for non-LAMMPS easyconfig?!")
+
+
 def pre_configure_hook(self, *args, **kwargs):
     """Main pre-configure hook: trigger custom functions based on software name."""
     if self.name in PRE_CONFIGURE_HOOKS:
@@ -318,24 +331,6 @@ def pre_configure_hook_wrf_aarch64(self, *args, **kwargs):
         raise EasyBuildError("WRF-specific hook triggered for non-WRF easyconfig?!")
 
 
-def pre_configure_hook_LAMMPS_aarch64(self, *args, **kwargs):
-    """
-    pre-configure hook for LAMMPS:
-    - set kokkos_arch on Aarch64
-    """
-
-    cpu_target = get_eessi_envvar('EESSI_SOFTWARE_SUBDIR')
-    if self.name == 'LAMMPS':
-        if self.version == '23Jun2022':
-            if  get_cpu_architecture() == AARCH64:
-                if cpu_target == CPU_TARGET_AARCH64_GENERIC:
-                    self.cfg['kokkos_arch'] = 'ARM80'
-                else:
-                    self.cfg['kokkos_arch'] = 'ARM81'
-    else:
-        raise EasyBuildError("LAMMPS-specific hook triggered for non-LAMMPS easyconfig?!")
-
-
 def pre_configure_hook_atspi2core_filter_ld_library_path(self, *args, **kwargs):
     """
     pre-configure hook for at-spi2-core:
@@ -355,6 +350,16 @@ def pre_test_hook(self,*args, **kwargs):
     """Main pre-test hook: trigger custom functions based on software name."""
     if self.name in PRE_TEST_HOOKS:
         PRE_TEST_HOOKS[self.name](self, *args, **kwargs)
+
+
+def pre_test_hook_exclude_failing_test_Highway(self, *args, **kwargs):
+    """
+    Pre-test hook for Highway: exclude failing TestAllShiftRightLanes/SVE_256 test on neoverse_v1
+    cfr. https://github.com/EESSI/software-layer/issues/469
+    """
+    cpu_target = get_eessi_envvar('EESSI_SOFTWARE_SUBDIR')
+    if self.name == 'Highway' and self.version in ['1.0.3'] and cpu_target == CPU_TARGET_NEOVERSE_V1:
+        self.cfg['runtest'] += ' ARGS="-E TestAllShiftRightLanes/SVE_256"'
 
 
 def pre_test_hook_ignore_failing_tests_ESPResSo(self, *args, **kwargs):
@@ -576,6 +581,7 @@ PARSE_HOOKS = {
     'pybind11': parse_hook_pybind11_replace_catch2,
     'Qt5': parse_hook_qt5_check_qtwebengine_disable,
     'UCX': parse_hook_ucx_eprefix,
+    'LAMMPS': parse_hook_lammps_remove_deps_for_CI_aarch64,
 }
 
 POST_PREPARE_HOOKS = {
@@ -587,13 +593,13 @@ PRE_CONFIGURE_HOOKS = {
     'MetaBAT': pre_configure_hook_metabat_filtered_zlib_dep,
     'OpenBLAS': pre_configure_hook_openblas_optarch_generic,
     'WRF': pre_configure_hook_wrf_aarch64,
-    'LAMMPS': pre_configure_hook_LAMMPS_aarch64,
     'at-spi2-core': pre_configure_hook_atspi2core_filter_ld_library_path,
 }
 
 PRE_TEST_HOOKS = {
     'ESPResSo': pre_test_hook_ignore_failing_tests_ESPResSo,
     'FFTW.MPI': pre_test_hook_ignore_failing_tests_FFTWMPI,
+    'Highway': pre_test_hook_exclude_failing_test_Highway,
     'SciPy-bundle': pre_test_hook_ignore_failing_tests_SciPybundle,
     'netCDF': pre_test_hook_ignore_failing_tests_netCDF,
     'PyTorch': pre_test_hook_increase_max_failed_tests_arm_PyTorch,
@@ -612,3 +618,4 @@ POST_SINGLE_EXTENSION_HOOKS = {
 POST_SANITYCHECK_HOOKS = {
     'CUDA': post_sanitycheck_cuda,
 }
+
