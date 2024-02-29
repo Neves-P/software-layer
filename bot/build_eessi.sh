@@ -156,14 +156,14 @@ export EESSI_OS_TYPE=${EESSI_OS_TYPE:-linux}
 echo "bot/build.sh: EESSI_OS_TYPE='${EESSI_OS_TYPE}'"
 
 # prepare arguments to eessi_container.sh common to build and tarball steps
-#declare -a COMMON_ARGS=()
-# COMMON_ARGS+=("--verbose")
-# COMMON_ARGS+=("--access" "rw")
-# COMMON_ARGS+=("--mode" "run")
-# [[ ! -z ${CONTAINER} ]] && COMMON_ARGS+=("--container" "${CONTAINER}")
-# [[ ! -z ${HTTP_PROXY} ]] && COMMON_ARGS+=("--http-proxy" "${HTTP_PROXY}")
-# [[ ! -z ${HTTPS_PROXY} ]] && COMMON_ARGS+=("--https-proxy" "${HTTPS_PROXY}")
-# [[ ! -z ${REPOSITORY} ]] && COMMON_ARGS+=("--repository" "${REPOSITORY}")
+declare -a COMMON_ARGS=()
+COMMON_ARGS+=("--verbose")
+COMMON_ARGS+=("--access" "rw")
+COMMON_ARGS+=("--mode" "run")
+[[ ! -z ${CONTAINER} ]] && COMMON_ARGS+=("--container" "${CONTAINER}")
+[[ ! -z ${HTTP_PROXY} ]] && COMMON_ARGS+=("--http-proxy" "${HTTP_PROXY}")
+[[ ! -z ${HTTPS_PROXY} ]] && COMMON_ARGS+=("--https-proxy" "${HTTPS_PROXY}")
+[[ ! -z ${REPOSITORY} ]] && COMMON_ARGS+=("--repository" "${REPOSITORY}")
 
 # make sure to use the same parent dir for storing tarballs of tmp
 PREVIOUS_TMP_DIR=${PWD}/previous_tmp
@@ -174,9 +174,8 @@ mkdir -p ${TARBALL_TMP_BUILD_STEP_DIR}
 
 # prepare arguments to eessi_container.sh specific to build step
 declare -a BUILD_STEP_ARGS=()
-BUILD_STEP_ARGS+=("-a ${CPU_TARGET}")
-BUILD_STEP_ARGS+=("-o /scratch/public/software-tarballs")
-
+BUILD_STEP_ARGS+=("--save" "${TARBALL_TMP_BUILD_STEP_DIR}")
+BUILD_STEP_ARGS+=("--storage" "${STORAGE}")
 # add options required to handle NVIDIA support
 BUILD_STEP_ARGS+=("--nvidia" "all")
 if [[ ! -z ${SHARED_FS_PATH} ]]; then
@@ -191,42 +190,44 @@ fi
 [[ ! -z ${BUILD_LOGS_DIR} ]] && INSTALL_SCRIPT_ARGS+=("--build-logs-dir" "${BUILD_LOGS_DIR}")
 [[ ! -z ${SHARED_FS_PATH} ]] && INSTALL_SCRIPT_ARGS+=("--shared-fs-path" "${SHARED_FS_PATH}")
 
-# # create tmp file for output of build step
-# build_outerr=$(mktemp build.outerr.XXXX)
+# create tmp file for output of build step
+build_outerr=$(mktemp build.outerr.XXXX)
 
 echo "Executing command to build software:"
-echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
-${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh "${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
+echo "./eessi_container.sh ${COMMON_ARGS[@]} ${BUILD_STEP_ARGS[@]}"
+echo "                     -- ./install_software_layer.sh \"${INSTALL_SCRIPT_ARGS[@]}\" \"$@\" 2>&1 | tee -a ${build_outerr}"
+./eessi_container.sh "${COMMON_ARGS[@]}" "${BUILD_STEP_ARGS[@]}" \
+                     -- ./install_software_layer.sh "${INSTALL_SCRIPT_ARGS[@]}" "$@" 2>&1 | tee -a ${build_outerr}
 
-# # prepare directory to store tarball of tmp for tarball step
-# TARBALL_TMP_TARBALL_STEP_DIR=${PREVIOUS_TMP_DIR}/tarball_step
-# mkdir -p ${TARBALL_TMP_TARBALL_STEP_DIR}
+# prepare directory to store tarball of tmp for tarball step
+TARBALL_TMP_TARBALL_STEP_DIR=${PREVIOUS_TMP_DIR}/tarball_step
+mkdir -p ${TARBALL_TMP_TARBALL_STEP_DIR}
 
-# # create tmp file for output of tarball step
-# tar_outerr=$(mktemp tar.outerr.XXXX)
+# create tmp file for output of tarball step
+tar_outerr=$(mktemp tar.outerr.XXXX)
 
-# # prepare arguments to eessi_container.sh specific to tarball step
-# declare -a TARBALL_STEP_ARGS=()
-# TARBALL_STEP_ARGS+=("--save" "${TARBALL_TMP_TARBALL_STEP_DIR}")
+# prepare arguments to eessi_container.sh specific to tarball step
+declare -a TARBALL_STEP_ARGS=()
+TARBALL_STEP_ARGS+=("--save" "${TARBALL_TMP_TARBALL_STEP_DIR}")
 
-# # determine temporary directory to resume from
-# BUILD_TMPDIR=$(grep ' as tmp directory ' ${build_outerr} | cut -d ' ' -f 2)
-# TARBALL_STEP_ARGS+=("--resume" "${BUILD_TMPDIR}")
+# determine temporary directory to resume from
+BUILD_TMPDIR=$(grep ' as tmp directory ' ${build_outerr} | cut -d ' ' -f 2)
+TARBALL_STEP_ARGS+=("--resume" "${BUILD_TMPDIR}")
 
-# timestamp=$(date +%s)
-# # to set EESSI_VERSION we need to source init/eessi_defaults now
-# source init/eessi_defaults
-# export TGZ=$(printf "eessi-%s-software-%s-%s-%d.tar.gz" ${EESSI_VERSION} ${EESSI_OS_TYPE} ${EESSI_SOFTWARE_SUBDIR_OVERRIDE//\//-} ${timestamp})
+timestamp=$(date +%s)
+# to set EESSI_VERSION we need to source init/eessi_defaults now
+source init/eessi_defaults
+export TGZ=$(printf "eessi-%s-software-%s-%s-%d.tar.gz" ${EESSI_VERSION} ${EESSI_OS_TYPE} ${EESSI_SOFTWARE_SUBDIR_OVERRIDE//\//-} ${timestamp})
 
 # value of first parameter to create_tarball.sh - TMP_IN_CONTAINER - needs to be
 # synchronised with setting of TMP_IN_CONTAINER in eessi_container.sh
 # TODO should we make this a configurable parameter of eessi_container.sh using
 # /tmp as default?
-# TMP_IN_CONTAINER=/tmp
-# echo "Executing command to create tarball:"
-# echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh"
-# echo "                     -- ./create_tarball.sh ${TMP_IN_CONTAINER} ${EESSI_VERSION} ${EESSI_SOFTWARE_SUBDIR_OVERRIDE} /eessi_bot_job/${TGZ} 2>&1 | tee -a ${tar_outerr}"
-# ./eessi_container.sh "${COMMON_ARGS[@]}" "${TARBALL_STEP_ARGS[@]}" \
-#                      -- ./create_tarball.sh ${TMP_IN_CONTAINER} ${EESSI_VERSION} ${EESSI_SOFTWARE_SUBDIR_OVERRIDE} /eessi_bot_job/${TGZ} 2>&1 | tee -a ${tar_outerr}
+TMP_IN_CONTAINER=/tmp
+echo "Executing command to create tarball:"
+echo "./eessi_container.sh ${COMMON_ARGS[@]} ${TARBALL_STEP_ARGS[@]}"
+echo "                     -- ./create_tarball.sh ${TMP_IN_CONTAINER} ${EESSI_VERSION} ${EESSI_SOFTWARE_SUBDIR_OVERRIDE} /eessi_bot_job/${TGZ} 2>&1 | tee -a ${tar_outerr}"
+./eessi_container.sh "${COMMON_ARGS[@]}" "${TARBALL_STEP_ARGS[@]}" \
+                     -- ./create_tarball.sh ${TMP_IN_CONTAINER} ${EESSI_VERSION} ${EESSI_SOFTWARE_SUBDIR_OVERRIDE} /eessi_bot_job/${TGZ} 2>&1 | tee -a ${tar_outerr}
 
 exit 0
