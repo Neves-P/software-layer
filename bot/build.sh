@@ -192,7 +192,34 @@ fi
 [[ ! -z ${SHARED_FS_PATH} ]] && INSTALL_SCRIPT_ARGS+=("--shared-fs-path" "${SHARED_FS_PATH}")
 
 # # create tmp file for output of build step
-# build_outerr=$(mktemp build.outerr.XXXX)
+build_outerr=$(mktemp build.outerr.XXXX)
+
+
+
+# Get easystack (as in EESSI-install-software.sh)
+# use PR patch file to determine in which easystack files stuff was added
+changed_easystacks=$(cat ${pr_diff} | grep '^+++' | cut -f2 -d' ' | sed 's@^[a-z]/@@g' | grep '^easystacks/.*yml$' | egrep -v 'known-issues|missing') 
+if [ -z ${changed_easystacks} ]; then
+    echo "No missing installations, party time!"  # Ensure the bot report success, as there was nothing to be build here
+else
+    for easystack_file in ${changed_easystacks}; do
+    
+        echo -e "Processing easystack file ${easystack_file}...\n\n"
+    
+        echo_green "All set, let's start installing some software with EasyBuild v${eb_version} in ${EASYBUILD_INSTALLPATH}..."
+    
+        if [ -f ${easystack_file} ]; then
+            echo_green "Creating easystack file arg"
+    
+            BUILD_STEP_ARGS+=("--easystack ${TOPDIR}/${easystack_file} --robot")
+        else
+            fatal_error "Easystack file ${easystack_file} not found!"
+        fi
+    
+    done
+fi
+
+
 
 echo "Executing command to build software:"
 echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
