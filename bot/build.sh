@@ -205,13 +205,15 @@ else
     for easystack_file in ${changed_easystacks}; do
     
         echo -e "Processing easystack file ${easystack_file}...\n\n"
+        easyconfigs=$(grep '^+.*.eb$' 19.diff | awk -v ORS=' ' '{print $3}')
     
         echo_green "All set, let's start installing some software with EasyBuild in ${EASYBUILD_INSTALLPATH}..."
     
-        if [ -f ${easystack_file} ]; then
-            echo_green "Creating easystack file arg"
+        if [ -z ${easyconfigs+x}]; then
+            echo_green "Successfully read easyconfig files\n"
+            echo "Building following easyconfigs: ${easyconfigs}"
     
-            BUILD_STEP_ARGS+=("--easystack ${TOPDIR}/${easystack_file} --robot")
+            BUILD_STEP_ARGS+=("${easyconfigs} --robot")
         else
             fatal_error "Easystack file ${easystack_file} not found!"
         fi
