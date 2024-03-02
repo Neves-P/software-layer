@@ -219,7 +219,7 @@ else
     done
 fi
 
-
+echo "bot/build.sh: changed_easystacks='${changed_easystacks}'"
 
 echo "Executing command to build software:"
 echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
