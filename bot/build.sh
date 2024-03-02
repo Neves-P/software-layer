@@ -174,14 +174,14 @@ mkdir -p ${TARBALL_TMP_BUILD_STEP_DIR}
 
 # prepare arguments to eessi_container.sh specific to build step
 declare -a BUILD_STEP_ARGS=()
-BUILD_STEP_ARGS+=("-a ${CPU_TARGET}")
-BUILD_STEP_ARGS+=("-o /scratch/public/software-tarballs")
+#BUILD_STEP_ARGS+=("-a ${CPU_TARGET}")
+#BUILD_STEP_ARGS+=("-o /scratch/public/software-tarballs")
 
 # add options required to handle NVIDIA support
-BUILD_STEP_ARGS+=("--nvidia" "all")
-if [[ ! -z ${SHARED_FS_PATH} ]]; then
-    BUILD_STEP_ARGS+=("--host-injections" "${SHARED_FS_PATH}/host-injections")
-fi
+#BUILD_STEP_ARGS+=("--nvidia" "all")
+#if [[ ! -z ${SHARED_FS_PATH} ]]; then
+#    BUILD_STEP_ARGS+=("--host-injections" "${SHARED_FS_PATH}/host-injections")
+#fi
 
 # prepare arguments to install_software_layer.sh (specific to build step)
 declare -a INSTALL_SCRIPT_ARGS=()
@@ -195,9 +195,9 @@ fi
 build_outerr=$(mktemp build.outerr.XXXX)
 
 
-
 # Get easystack (as in EESSI-install-software.sh)
 # use PR patch file to determine in which easystack files stuff was added
+pr_diff=$(ls [0-9]*.diff | head -1)
 changed_easystacks=$(cat ${pr_diff} | grep '^+++' | cut -f2 -d' ' | sed 's@^[a-z]/@@g' | grep '^easystacks/.*yml$' | egrep -v 'known-issues|missing') 
 if [ -z ${changed_easystacks} ]; then
     echo "No missing installations, party time!"  # Ensure the bot report success, as there was nothing to be build here
@@ -206,7 +206,7 @@ else
     
         echo -e "Processing easystack file ${easystack_file}...\n\n"
     
-        echo_green "All set, let's start installing some software with EasyBuild v${eb_version} in ${EASYBUILD_INSTALLPATH}..."
+        echo_green "All set, let's start installing some software with EasyBuild in ${EASYBUILD_INSTALLPATH}..."
     
         if [ -f ${easystack_file} ]; then
             echo_green "Creating easystack file arg"
@@ -222,8 +222,8 @@ fi
 echo "bot/build.sh: changed_easystacks='${changed_easystacks}'"
 
 echo "Executing command to build software:"
-echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
-${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh "${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
+echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh -o /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
+${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh "-o /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
 
 # # prepare directory to store tarball of tmp for tarball step
 # TARBALL_TMP_TARBALL_STEP_DIR=${PREVIOUS_TMP_DIR}/tarball_step
