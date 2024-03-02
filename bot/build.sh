@@ -205,11 +205,11 @@ else
     for easystack_file in ${changed_easystacks}; do
     
         echo -e "Processing easystack file ${easystack_file}...\n\n"
-        easyconfigs=$(grep '^+.*.eb$' 19.diff | awk -v ORS=' ' '{print $3}')
+        easyconfigs=$(grep '^+.*.eb$' ${pr_diff} | awk -v ORS=' ' '{print $3}')
     
         echo_green "All set, let's start installing some software with EasyBuild in ${EASYBUILD_INSTALLPATH}..."
     
-        if [ -z ${easyconfigs+x}]; then
+        if [ ! -z ${easyconfigs} ]; then
             echo_green "Successfully read easyconfig files\n"
             echo "Building following easyconfigs: ${easyconfigs}"
     
