@@ -358,8 +358,8 @@ success_msg="no message matching <code>${GP_req_missing}</code>"
 failure_msg="found message matching <code>${GP_req_missing}</code>"
 CoDeList=${CoDeList}$(add_detail ${MISSING} 0 "${success_msg}" "${failure_msg}")
 
-success_msg="found message(s) matching <code>${GP_no_missing}</code>"
-failure_msg="no message matching <code>${GP_no_missing}</code>"
+success_msg="found message(s) saying built application ($n_built) match build requests ($n_to_build)"
+failure_msg="built applications ($n_built) don't match build requests ($n_to_build)"
 CoDeList=${CoDeList}$(add_detail ${NO_MISSING} 1 "${success_msg}" "${failure_msg}")
 
 success_msg="found message matching <code>${GP_tgz_created}</code>"
