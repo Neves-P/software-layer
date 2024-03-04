@@ -199,6 +199,7 @@ build_outerr=$(mktemp build.outerr.XXXX)
 # use PR patch file to determine in which easystack files stuff was added
 pr_diff=$(ls [0-9]*.diff | head -1)
 changed_easystacks=$(cat ${pr_diff} | grep '^+++' | cut -f2 -d' ' | sed 's@^[a-z]/@@g' | grep '^easystacks/.*yml$' | egrep -v 'known-issues|missing') 
+echo "bot/build.sh: changed_easystacks='${changed_easystacks}'"
 if [ -z ${changed_easystacks} ]; then
     echo "No missing installations, party time!"  # Ensure the bot report success, as there was nothing to be build here
 else
@@ -221,7 +222,7 @@ else
     done
 fi
 
-echo "bot/build.sh: changed_easystacks='${changed_easystacks}'"
+
 
 echo "Executing command to build software:"
 echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh -o='/scratch/public/software-tarballs' -- eb ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
