@@ -416,7 +416,8 @@ if [[ ! -z ${TARBALL} ]]; then
     repo_version=$(cfg_get_value "repository" "repo_version")
     os_type=$(cfg_get_value "architecture" "os_type")
     software_subdir=$(cfg_get_value "architecture" "software_subdir")
-    prefix="${repo_version}/software/${os_type}/${software_subdir}"
+    
+    prefix="${repo_version}/${os_type}/${software_subdir}"
 
     # extract directories/entries from tarball content
     modules_entries=$(grep "${prefix}/modules" ${tmpfile})
