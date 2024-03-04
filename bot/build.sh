@@ -107,7 +107,7 @@ echo "bot/build.sh: LOAD_MODULES='${LOAD_MODULES}'"
 
 # singularity/apptainer settings: CONTAINER, HOME, TMPDIR, BIND
 CONTAINER=$(cfg_get_value "repository" "container")
-export SINGULARITY_HOME="${PWD}:/eessi_bot_job"
+# export SINGULARITY_HOME="${PWD}:/eessi_bot_job"
 export SINGULARITY_TMPDIR="${PWD}/singularity_tmpdir"
 mkdir -p ${SINGULARITY_TMPDIR}
 
