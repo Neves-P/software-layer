@@ -135,11 +135,15 @@ if [[ ${SLURM} -eq 1 ]]; then
   [[ ${VERBOSE} -ne 0 ]] && echo "${grep_out}"
 fi
 
-NO_MISSING=-1
+N_TO_BUILD=-1
+N_BUILT=-1
 if [[ ${SLURM} -eq 1 ]]; then
-  GP_no_missing='No missing installations'
+  GP_no_missing='== Build succeeded for'
   grep_out=$(grep -v "^>> searching for " ${job_dir}/${job_out} | grep "${GP_no_missing}")
-  [[ $? -eq 0 ]] && NO_MISSING=1 || NO_MISSING=0
+  
+  n_built=$(echo $grep_out | grep -oP '(?<=for )[0-9]+')
+  n_to_build=$(echo $grep_out | grep -oP '(?<=out of )[0-9]+')
+  [[${n_built} -e ${n_to_build}]] && NO_MISSING=1 || NO_MISSING=0
   # have to be careful to not add searched for pattern into slurm out file
   [[ ${VERBOSE} -ne 0 ]] && echo ">> searching for '"${GP_no_missing}"'"
   [[ ${VERBOSE} -ne 0 ]] && echo "${grep_out}"
