@@ -124,22 +124,22 @@ fi
 
 # determine repository to be used from entry .repository in ${JOB_CFG_FILE}
 REPOSITORY=$(cfg_get_value "repository" "repo_id")
-EESSI_REPOS_CFG_DIR_OVERRIDE=$(cfg_get_value "repository" "repos_cfg_dir")
-export EESSI_REPOS_CFG_DIR_OVERRIDE=${EESSI_REPOS_CFG_DIR_OVERRIDE:-${PWD}/cfg}
-echo "bot/build.sh: EESSI_REPOS_CFG_DIR_OVERRIDE='${EESSI_REPOS_CFG_DIR_OVERRIDE}'"
+# EESSI_REPOS_CFG_DIR_OVERRIDE=$(cfg_get_value "repository" "repos_cfg_dir")
+# export EESSI_REPOS_CFG_DIR_OVERRIDE=${EESSI_REPOS_CFG_DIR_OVERRIDE:-${PWD}/cfg}
+# echo "bot/build.sh: EESSI_REPOS_CFG_DIR_OVERRIDE='${EESSI_REPOS_CFG_DIR_OVERRIDE}'"
 
 # determine EESSI version to be used from .repository.repo_version in ${JOB_CFG_FILE}
 # here, just set & export EESSI_VERSION_OVERRIDE
 # next script (eessi_container.sh) makes use of it via sourcing init scripts
 # (e.g., init/eessi_defaults or init/minimal_eessi_env)
-export EESSI_VERSION_OVERRIDE=$(cfg_get_value "repository" "repo_version")
-echo "bot/build.sh: EESSI_VERSION_OVERRIDE='${EESSI_VERSION_OVERRIDE}'"
+# export EESSI_VERSION_OVERRIDE=$(cfg_get_value "repository" "repo_version")
+# echo "bot/build.sh: EESSI_VERSION_OVERRIDE='${EESSI_VERSION_OVERRIDE}'"
 
 # determine CVMFS repo to be used from .repository.repo_name in ${JOB_CFG_FILE}
 # here, just set EESSI_CVMFS_REPO_OVERRIDE, a bit further down
 # "source init/eessi_defaults" via sourcing init/minimal_eessi_env
-export EESSI_CVMFS_REPO_OVERRIDE=$(cfg_get_value "repository" "repo_name")
-echo "bot/build.sh: EESSI_CVMFS_REPO_OVERRIDE='${EESSI_CVMFS_REPO_OVERRIDE}'"
+# export EESSI_CVMFS_REPO_OVERRIDE=$(cfg_get_value "repository" "repo_name")
+# echo "bot/build.sh: EESSI_CVMFS_REPO_OVERRIDE='${EESSI_CVMFS_REPO_OVERRIDE}'"
 
 # determine architecture to be used from entry .architecture in ${JOB_CFG_FILE}
 # fallbacks:
@@ -225,8 +225,8 @@ fi
 
 
 echo "Executing command to build software:"
-echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh -o /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
-${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh " -o /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
+echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh --output /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
+${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh " --output /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
 
 # # prepare directory to store tarball of tmp for tarball step
 # TARBALL_TMP_TARBALL_STEP_DIR=${PREVIOUS_TMP_DIR}/tarball_step
