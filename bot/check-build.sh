@@ -143,7 +143,7 @@ if [[ ${SLURM} -eq 1 ]]; then
   
   n_built=$(echo $grep_out | grep -oP '(?<=for )[0-9]+')
   n_to_build=$(echo $grep_out | grep -oP '(?<=out of )[0-9]+')
-  [[${n_built} -e ${n_to_build}]] && NO_MISSING=1 || NO_MISSING=0
+  [[ "${n_built}" == "${n_to_build}" ]] && NO_MISSING=1 || NO_MISSING=0
   # have to be careful to not add searched for pattern into slurm out file
   [[ ${VERBOSE} -ne 0 ]] && echo ">> searching for '"${GP_no_missing}"'"
   [[ ${VERBOSE} -ne 0 ]] && echo "${grep_out}"
