@@ -226,7 +226,7 @@ fi
 
 echo "Executing command to build software:"
 echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh --output /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
-${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh " --output /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
+${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container_bot.sh --output /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]} 2>&1 | tee -a ${build_outerr}
 
 # # prepare directory to store tarball of tmp for tarball step
 # TARBALL_TMP_TARBALL_STEP_DIR=${PREVIOUS_TMP_DIR}/tarball_step
