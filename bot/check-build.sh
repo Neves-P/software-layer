@@ -152,7 +152,7 @@ if [[ ${SLURM} -eq 1 ]]; then
   grep_out=$(grep -v "^>> searching for " ${job_dir}/${job_out} | grep "${GP_tgz_created}" | sort -u)
   if [[ $? -eq 0 ]]; then
       TGZ=1
-      TARBALL=$(echo ${grep_out} | sed -e 's@^.*/\(eessi[^/ ]*\) .*$@\1@')
+      TARBALL=$(echo ${grep_out} | sed -e 's@^.*/\('${repo_version}'[^/ ]*\) .*$@\1@')
   else
       TGZ=0
   fi
