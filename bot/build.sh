@@ -80,13 +80,13 @@ if [[ ! -z ${SHARED_FS_PATH} ]]; then
     fi
 fi
 
-SINGULARITY_CACHEDIR=$(cfg_get_value "site_config" "container_cachedir")
-echo "bot/build.sh: SINGULARITY_CACHEDIR='${SINGULARITY_CACHEDIR}'"
-if [[ ! -z ${SINGULARITY_CACHEDIR} ]]; then
-    # make sure that separate directories are used for different CPU families
-    SINGULARITY_CACHEDIR=${SINGULARITY_CACHEDIR}/${HOST_ARCH}
-    export SINGULARITY_CACHEDIR
-fi
+# SINGULARITY_CACHEDIR=$(cfg_get_value "site_config" "container_cachedir")
+# echo "bot/build.sh: SINGULARITY_CACHEDIR='${SINGULARITY_CACHEDIR}'"
+# if [[ ! -z ${SINGULARITY_CACHEDIR} ]]; then
+#     # make sure that separate directories are used for different CPU families
+#     SINGULARITY_CACHEDIR=${SINGULARITY_CACHEDIR}/${HOST_ARCH}
+#     export SINGULARITY_CACHEDIR
+# fi
 
 echo -n "setting \$STORAGE by replacing any var in '${LOCAL_TMP}' -> "
 # replace any env variable in ${LOCAL_TMP} with its
