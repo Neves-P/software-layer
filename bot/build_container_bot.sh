@@ -199,8 +199,6 @@ then
   # Use archspec to determine the architecture name of this host.
   #ARCH=$(uname -m)/$(singularity exec ${BUILD_CONTAINER} archspec cpu)
   # Use EESSI's archdetect script to determine the architecture name of this host.
-  echo "Executing command:"
-  echo "SW_STACK_ARCH=$(singularity exec ${BUILD_CONTAINER} eessi_archdetect.sh cpupath)"
   SW_STACK_ARCH=$(singularity exec ${BUILD_CONTAINER} eessi_archdetect.sh cpupath)
   #SW_STACK_ARCH=x86_64/amd/zen2
 elif [ ! -z "${SW_STACK_ARCH##*'/'*'/'*}" ]
