@@ -1,4 +1,4 @@
 easyconfigs:
   - ALL-0.9.2-foss-2022b.eb
   - scikit-misc-0.1.4-foss-2022a.eb
-  - Beast-2.6.7-GCC-10.3.0.eb
+  - SAMtools-0.1.20-GCC-12.3.0.eb
