@@ -1,3 +1,4 @@
 easyconfigs:
   - ALL-0.9.2-foss-2022b.eb
   - scikit-misc-0.1.4-foss-2022a.eb
+  - Valgrind-3.21.0-gompi-2023a.eb
