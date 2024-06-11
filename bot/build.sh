@@ -80,13 +80,13 @@ if [[ ! -z ${SHARED_FS_PATH} ]]; then
     fi
 fi
 
-SINGULARITY_CACHEDIR=$(cfg_get_value "site_config" "container_cachedir")
-echo "bot/build.sh: SINGULARITY_CACHEDIR='${SINGULARITY_CACHEDIR}'"
-if [[ ! -z ${SINGULARITY_CACHEDIR} ]]; then
-    # make sure that separate directories are used for different CPU families
-    SINGULARITY_CACHEDIR=${SINGULARITY_CACHEDIR}/${HOST_ARCH}
-    export SINGULARITY_CACHEDIR
-fi
+# SINGULARITY_CACHEDIR=$(cfg_get_value "site_config" "container_cachedir")
+# echo "bot/build.sh: SINGULARITY_CACHEDIR='${SINGULARITY_CACHEDIR}'"
+# if [[ ! -z ${SINGULARITY_CACHEDIR} ]]; then
+#     # make sure that separate directories are used for different CPU families
+#     SINGULARITY_CACHEDIR=${SINGULARITY_CACHEDIR}/${HOST_ARCH}
+#     export SINGULARITY_CACHEDIR
+# fi
 
 echo -n "setting \$STORAGE by replacing any var in '${LOCAL_TMP}' -> "
 # replace any env variable in ${LOCAL_TMP} with its
@@ -107,7 +107,7 @@ echo "bot/build.sh: LOAD_MODULES='${LOAD_MODULES}'"
 
 # singularity/apptainer settings: CONTAINER, HOME, TMPDIR, BIND
 CONTAINER=$(cfg_get_value "repository" "container")
-export SINGULARITY_HOME="${PWD}:/eessi_bot_job"
+# export SINGULARITY_HOME="${PWD}:/eessi_bot_job"
 export SINGULARITY_TMPDIR="${PWD}/singularity_tmpdir"
 mkdir -p ${SINGULARITY_TMPDIR}
 
@@ -124,22 +124,22 @@ fi
 
 # determine repository to be used from entry .repository in ${JOB_CFG_FILE}
 REPOSITORY=$(cfg_get_value "repository" "repo_id")
-EESSI_REPOS_CFG_DIR_OVERRIDE=$(cfg_get_value "repository" "repos_cfg_dir")
-export EESSI_REPOS_CFG_DIR_OVERRIDE=${EESSI_REPOS_CFG_DIR_OVERRIDE:-${PWD}/cfg}
-echo "bot/build.sh: EESSI_REPOS_CFG_DIR_OVERRIDE='${EESSI_REPOS_CFG_DIR_OVERRIDE}'"
+# EESSI_REPOS_CFG_DIR_OVERRIDE=$(cfg_get_value "repository" "repos_cfg_dir")
+# export EESSI_REPOS_CFG_DIR_OVERRIDE=${EESSI_REPOS_CFG_DIR_OVERRIDE:-${PWD}/cfg}
+# echo "bot/build.sh: EESSI_REPOS_CFG_DIR_OVERRIDE='${EESSI_REPOS_CFG_DIR_OVERRIDE}'"
 
 # determine EESSI version to be used from .repository.repo_version in ${JOB_CFG_FILE}
 # here, just set & export EESSI_VERSION_OVERRIDE
 # next script (eessi_container.sh) makes use of it via sourcing init scripts
 # (e.g., init/eessi_defaults or init/minimal_eessi_env)
-export EESSI_VERSION_OVERRIDE=$(cfg_get_value "repository" "repo_version")
-echo "bot/build.sh: EESSI_VERSION_OVERRIDE='${EESSI_VERSION_OVERRIDE}'"
+# export EESSI_VERSION_OVERRIDE=$(cfg_get_value "repository" "repo_version")
+# echo "bot/build.sh: EESSI_VERSION_OVERRIDE='${EESSI_VERSION_OVERRIDE}'"
 
 # determine CVMFS repo to be used from .repository.repo_name in ${JOB_CFG_FILE}
 # here, just set EESSI_CVMFS_REPO_OVERRIDE, a bit further down
 # "source init/eessi_defaults" via sourcing init/minimal_eessi_env
-export EESSI_CVMFS_REPO_OVERRIDE=$(cfg_get_value "repository" "repo_name")
-echo "bot/build.sh: EESSI_CVMFS_REPO_OVERRIDE='${EESSI_CVMFS_REPO_OVERRIDE}'"
+# export EESSI_CVMFS_REPO_OVERRIDE=$(cfg_get_value "repository" "repo_name")
+# echo "bot/build.sh: EESSI_CVMFS_REPO_OVERRIDE='${EESSI_CVMFS_REPO_OVERRIDE}'"
 
 # determine architecture to be used from entry .architecture in ${JOB_CFG_FILE}
 # fallbacks:
@@ -174,14 +174,14 @@ mkdir -p ${TARBALL_TMP_BUILD_STEP_DIR}
 
 # prepare arguments to eessi_container.sh specific to build step
 declare -a BUILD_STEP_ARGS=()
-BUILD_STEP_ARGS+=("-a ${CPU_TARGET}")
-BUILD_STEP_ARGS+=("-o /scratch/public/software-tarballs")
+#BUILD_STEP_ARGS+=("-a ${CPU_TARGET}")
+#BUILD_STEP_ARGS+=("-o /scratch/public/software-tarballs")
 
 # add options required to handle NVIDIA support
-BUILD_STEP_ARGS+=("--nvidia" "all")
-if [[ ! -z ${SHARED_FS_PATH} ]]; then
-    BUILD_STEP_ARGS+=("--host-injections" "${SHARED_FS_PATH}/host-injections")
-fi
+#BUILD_STEP_ARGS+=("--nvidia" "all")
+#if [[ ! -z ${SHARED_FS_PATH} ]]; then
+#    BUILD_STEP_ARGS+=("--host-injections" "${SHARED_FS_PATH}/host-injections")
+#fi
 
 # prepare arguments to install_software_layer.sh (specific to build step)
 declare -a INSTALL_SCRIPT_ARGS=()
@@ -192,11 +192,41 @@ fi
 [[ ! -z ${SHARED_FS_PATH} ]] && INSTALL_SCRIPT_ARGS+=("--shared-fs-path" "${SHARED_FS_PATH}")
 
 # # create tmp file for output of build step
-# build_outerr=$(mktemp build.outerr.XXXX)
+build_outerr=$(mktemp build.outerr.XXXX)
+
+
+# Get easystack (as in EESSI-install-software.sh)
+# use PR patch file to determine in which easystack files stuff was added
+pr_diff=$(ls [0-9]*.diff | head -1)
+changed_easystacks=$(cat ${pr_diff} | grep '^+++' | cut -f2 -d' ' | sed 's@^[a-z]/@@g' | grep '^easystacks/.*yml$' | egrep -v 'known-issues|missing') 
+echo "bot/build.sh: changed_easystacks='${changed_easystacks}'"
+if [ -z ${changed_easystacks} ]; then
+    echo "No missing installations, party time!"  # Ensure the bot report success, as there was nothing to be build here
+else
+    for easystack_file in ${changed_easystacks}; do
+    
+        echo -e "Processing easystack file ${easystack_file}...\n\n"
+        easyconfigs=$(grep '^+.*.eb$' ${pr_diff} | awk -v ORS=' ' '{print $3}')
+    
+        echo_green "All set, let's start installing some software with EasyBuild in ${EASYBUILD_INSTALLPATH}..."
+    
+        if [ ! -z ${easyconfigs} ]; then
+            echo_green "Successfully read easyconfig files\n"
+            echo "Building following easyconfigs: ${easyconfigs}"
+    
+            BUILD_STEP_ARGS+=("${easyconfigs} --robot")
+        else
+            fatal_error "Easystack file ${easystack_file} not found!"
+        fi
+    
+    done
+fi
+
+
 
 echo "Executing command to build software:"
-echo "${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
-${HOME}/easybuild/cit-hpc-easybuild/jobscripts/habrok/build_container.sh "${BUILD_STEP_ARGS[@]}" 2>&1 | tee -a ${build_outerr}
+echo "bot/build_container_bot.sh -o /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]}  2>&1 | tee -a ${build_outerr}"
+./bot/build_container_bot.sh -o /scratch/public/software-tarballs -- eb ${BUILD_STEP_ARGS[@]} 2>&1 | tee -a ${build_outerr}
 
 # # prepare directory to store tarball of tmp for tarball step
 # TARBALL_TMP_TARBALL_STEP_DIR=${PREVIOUS_TMP_DIR}/tarball_step

@@ -135,11 +135,15 @@ if [[ ${SLURM} -eq 1 ]]; then
   [[ ${VERBOSE} -ne 0 ]] && echo "${grep_out}"
 fi
 
-NO_MISSING=-1
+N_TO_BUILD=-1
+N_BUILT=-1
 if [[ ${SLURM} -eq 1 ]]; then
-  GP_no_missing='No missing installations'
+  GP_no_missing='== Build succeeded for'
   grep_out=$(grep -v "^>> searching for " ${job_dir}/${job_out} | grep "${GP_no_missing}")
-  [[ $? -eq 0 ]] && NO_MISSING=1 || NO_MISSING=0
+  
+  n_built=$(echo $grep_out | grep -oP '(?<=for )[0-9]+')
+  n_to_build=$(echo $grep_out | grep -oP '(?<=out of )[0-9]+')
+  [[ "${n_built}" == "${n_to_build}" ]] && NO_MISSING=1 || NO_MISSING=0
   # have to be careful to not add searched for pattern into slurm out file
   [[ ${VERBOSE} -ne 0 ]] && echo ">> searching for '"${GP_no_missing}"'"
   [[ ${VERBOSE} -ne 0 ]] && echo "${grep_out}"
@@ -152,7 +156,7 @@ if [[ ${SLURM} -eq 1 ]]; then
   grep_out=$(grep -v "^>> searching for " ${job_dir}/${job_out} | grep "${GP_tgz_created}" | sort -u)
   if [[ $? -eq 0 ]]; then
       TGZ=1
-      TARBALL=$(echo ${grep_out} | sed -e 's@^.*/\(eessi[^/ ]*\) .*$@\1@')
+      TARBALL=$(echo ${grep_out} | cut -d ' ' -f 1)
   else
       TGZ=0
   fi
@@ -354,8 +358,8 @@ success_msg="no message matching <code>${GP_req_missing}</code>"
 failure_msg="found message matching <code>${GP_req_missing}</code>"
 CoDeList=${CoDeList}$(add_detail ${MISSING} 0 "${success_msg}" "${failure_msg}")
 
-success_msg="found message(s) matching <code>${GP_no_missing}</code>"
-failure_msg="no message matching <code>${GP_no_missing}</code>"
+success_msg="found message(s) saying number of built applications (<code>$n_built</code>) matches the number of  build requests (<code>$n_to_build</code>)"
+failure_msg="number of built applications (<code>$n_built</code>) doesn't match the number of build requests (<code>$n_to_build</code>)"
 CoDeList=${CoDeList}$(add_detail ${NO_MISSING} 1 "${success_msg}" "${failure_msg}")
 
 success_msg="found message matching <code>${GP_tgz_created}</code>"
@@ -416,7 +420,8 @@ if [[ ! -z ${TARBALL} ]]; then
     repo_version=$(cfg_get_value "repository" "repo_version")
     os_type=$(cfg_get_value "architecture" "os_type")
     software_subdir=$(cfg_get_value "architecture" "software_subdir")
-    prefix="${repo_version}/software/${os_type}/${software_subdir}"
+    
+    prefix="${repo_version}/${os_type}/${software_subdir}"
 
     # extract directories/entries from tarball content
     modules_entries=$(grep "${prefix}/modules" ${tmpfile})
