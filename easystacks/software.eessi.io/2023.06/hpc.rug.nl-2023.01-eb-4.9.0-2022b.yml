@@ -6,3 +6,5 @@ easyconfigs:
   - BamTools-2.5.2-GCC-11.2.0.eb
   - HighFive-2.7.1-gompi-2023a.eb
   - Centrifuge-1.0.4-gompi-2021a.eb
+  - exiv2-0.27.5-GCCcore-11.2.0.eb
+  
