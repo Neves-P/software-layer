@@ -5,3 +5,4 @@ easyconfigs:
   - BamTools-2.5.2-GCC-12.3.0.eb
   - BamTools-2.5.2-GCC-11.2.0.eb
   - HighFive-2.7.1-gompi-2023a.eb
+  - code-cli-1.85.1-x64.eb
