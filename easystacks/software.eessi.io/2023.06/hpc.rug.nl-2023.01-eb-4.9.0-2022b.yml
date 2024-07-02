@@ -2,6 +2,7 @@ easyconfigs:
   - ALL-0.9.2-foss-2022b.eb
   - scikit-misc-0.1.4-foss-2022a.eb
   - BamTools-2.5.2-GCC-12.3.0.eb
+  - BamTools-2.5.2-GCC-11.2.0.eb
   - Centrifuge-1.0.4-gompi-2021a.eb
   - exiv2-0.27.5-GCCcore-11.2.0.eb
   - qcat-1.1.0-foss-2022b.eb
