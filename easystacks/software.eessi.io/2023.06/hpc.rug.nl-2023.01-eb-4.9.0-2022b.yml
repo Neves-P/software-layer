@@ -9,3 +9,4 @@ easyconfigs:
   - SAMtools-1.15.1-GCC-11.3.0.eb
   - BAGEL-1.2.2-foss-2021a.eb
   - RevBayes-1.2.1-gompi-2022a.eb
+  - RevBayes-1.1.1-GCC-11.2.0.eb
