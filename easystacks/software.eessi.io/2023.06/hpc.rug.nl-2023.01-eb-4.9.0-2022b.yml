@@ -12,4 +12,5 @@ easyconfigs:
   - RevBayes-1.1.1-GCC-11.2.0.eb
   - TCLAP-1.2.5-GCCcore-11.2.0.eb
   - DBCSR-2.5.0-foss-2021b.eb
+  - HarfBuzz-8.2.2-GCCcore-13.2.0.eb
   
