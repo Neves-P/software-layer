@@ -15,4 +15,5 @@ easyconfigs:
   - HarfBuzz-8.2.2-GCCcore-13.2.0.eb
   - SAMtools-0.1.19-GCC-10.3.0.eb
   - SAMtools-1.15.1-GCC-11.3.0.eb
+  - SAMtools-1.15.1-GCC-11.2.0.eb
  
