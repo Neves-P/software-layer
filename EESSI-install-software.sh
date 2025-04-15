@@ -282,9 +282,8 @@ if [[ ! -z ${EESSI_DEV_PROJECT} ]]; then
     export ${EESSI_DEV_PROJECT}
 fi
 
-source $TOPDIR/load_eessi_extend_module.sh ${EESSI_VERSION}
 echo "DEBUG: before loading EESSI-extend // EASYBUILD_INSTALLPATH='${EASYBUILD_INSTALLPATH}'"
-source load_eessi_extend_module.sh ${EESSI_VERSION}
+source $TOPDIR/load_eessi_extend_module.sh ${EESSI_VERSION}
 echo "DEBUG: after loading EESSI-extend //  EASYBUILD_INSTALLPATH='${EASYBUILD_INSTALLPATH}'"
 
 # Install full CUDA SDK and cu* libraries in host_injections
