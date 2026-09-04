@@ -1,0 +1,26 @@
+{
+  "title": "CI Test",
+  "upload_type": "software",
+  "description": "This tests two new CI actions",
+  "creators": [
+    {
+      "name": "Doe, Jane",
+      "affiliation": "Somewhere University"
+    },
+    {
+      "name": "Nada, John",
+      "affiliation": "USC"
+    },
+    {
+      "name": "Armitage, Frank",
+      "affiliation": "UCLA"
+    }
+  ],
+    "keywords": [
+      "sunglasses",
+      "carpenter"
+    ],
+  "access_right": "open",
+  "license": "GPL-2.0-only",
+  "language": "eng"
+}
