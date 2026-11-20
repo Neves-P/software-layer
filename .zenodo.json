@@ -16,10 +16,13 @@
       "affiliation": "UCLA"
     }
   ],
-    "keywords": [
+  "keywords": [
       "sunglasses",
       "carpenter"
-    ],
+  ],
+  "communities": [
+    {"identifier": "test-eessi-community"}
+  ],
   "access_right": "open",
   "license": "GPL-2.0-only",
   "language": "eng"
