@@ -1,7 +1,7 @@
 {
-  "title": "CI Test",
+  "title": "EESSI software-layer",
   "upload_type": "software",
-  "description": "This tests two new CI actions",
+  "description": "The software layer component of the European Environment for Scientific Software Installations",
   "creators": [
     {
       "name": "Doe, Jane",
