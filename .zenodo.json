@@ -23,6 +23,9 @@
   "communities": [
     {"identifier": "test-eessi-community"}
   ],
+  "grants": [
+    {"id": "00k4n6c32::101093169"}
+  ]
   "access_right": "open",
   "license": "GPL-2.0-only",
   "language": "eng"
